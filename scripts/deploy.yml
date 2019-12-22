@@ -97,6 +97,9 @@ spec:
       containers:
         - name: backend
           image: anshelen/microservices-backend:latest
+          envFrom:
+            - configMapRef:
+                name: urls-config
           ports:
             - containerPort: 8080
               protocol: TCP
@@ -142,9 +145,9 @@ spec:
       containers:
         - name: gateway
           image: anshelen/microservices-gateway:latest
-          env:
-            - name: BACKEND_URL
-              value: "http://backend:8080/"
+          envFrom:
+            - configMapRef:
+                name: urls-config
           readinessProbe:
               httpGet:
                 path: /actuator/health
