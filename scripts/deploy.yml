@@ -100,6 +100,12 @@ spec:
           ports:
             - containerPort: 8080
               protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 3
           resources:
             limits:
               memory: "1024Mi"
@@ -139,6 +145,12 @@ spec:
           env:
             - name: BACKEND_URL
               value: "http://backend:8080/"
+          readinessProbe:
+              httpGet:
+                path: /actuator/health
+                port: 8080
+              initialDelaySeconds: 5
+              periodSeconds: 3
           ports:
             - containerPort: 8080
               protocol: TCP
