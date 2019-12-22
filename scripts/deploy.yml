@@ -148,6 +148,12 @@ spec:
           envFrom:
             - configMapRef:
                 name: urls-config
+          env:
+            - name: SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: msvc-secret
+                  key: secret
           readinessProbe:
               httpGet:
                 path: /actuator/health
