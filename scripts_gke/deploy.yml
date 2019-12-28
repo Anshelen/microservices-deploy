@@ -101,7 +101,7 @@ metadata:
     app: microservices
   namespace: msvc-ns
 spec:
-  replicas: 3
+  replicas: 2
   selector:
     matchLabels:
       tier: backend
@@ -132,11 +132,26 @@ spec:
             periodSeconds: 3
           resources:
             limits:
-              memory: "1024Mi"
-              cpu: "500m"
-            requests:
               memory: "512Mi"
-              cpu: "100m"
+              cpu: "300m"
+            requests:
+              memory: "256Mi"
+              cpu: "50m"
+
+---
+
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: backend
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: backend
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 50
 
 ---
 
@@ -149,7 +164,7 @@ metadata:
     app: microservices
   namespace: msvc-ns
 spec:
-  replicas: 3
+  replicas: 2
   selector:
     matchLabels:
       tier: gateway
@@ -186,8 +201,23 @@ spec:
               protocol: TCP
           resources:
             limits:
-              memory: "1024Mi"
-              cpu: "500m"
-            requests:
               memory: "512Mi"
-              cpu: "100m"
+              cpu: "300m"
+            requests:
+              memory: "256Mi"
+              cpu: "50m"
+
+---
+
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: gateway
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: gateway
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 50
