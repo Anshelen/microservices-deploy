@@ -1,0 +1,173 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: msvc-ns
+  labels:
+    app: microservices
+
+---
+
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: msvc-quota
+  namespace: msvc-ns
+spec:
+  hard:
+    limits.cpu: "4"
+    limits.memory: 8Gi
+
+---
+
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: msvc-default-resources
+  namespace: msvc-ns
+spec:
+  limits:
+    - default:
+        cpu: "700m"
+        memory: "1024Mi"
+      defaultRequest:
+        cpu: "200m"
+        memory: "256Mi"
+      type: Container
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    tier: backend
+  name: backend
+  namespace: msvc-ns
+spec:
+  ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    tier: backend
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    tier: gateway
+  name: gateway
+  namespace: msvc-ns
+spec:
+  ports:
+    - nodePort: 30500
+      port: 80
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    tier: gateway
+  type: NodePort
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  labels:
+    tier: backend
+    app: microservices
+  namespace: msvc-ns
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      tier: backend
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        tier: backend
+    spec:
+      containers:
+        - name: backend
+          image: anshelen/microservices-backend:latest
+          envFrom:
+            - configMapRef:
+                name: urls-config
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 3
+          resources:
+            limits:
+              memory: "1024Mi"
+              cpu: "500m"
+            requests:
+              memory: "512Mi"
+              cpu: "100m"
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway
+  labels:
+    tier: gateway
+    app: microservices
+  namespace: msvc-ns
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      tier: gateway
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        tier: gateway
+    spec:
+      containers:
+        - name: gateway
+          image: anshelen/microservices-gateway:latest
+          envFrom:
+            - configMapRef:
+                name: urls-config
+          env:
+            - name: SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: msvc-secret
+                  key: secret
+          readinessProbe:
+              httpGet:
+                path: /actuator/health
+                port: 8080
+              initialDelaySeconds: 5
+              periodSeconds: 3
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          resources:
+            limits:
+              memory: "1024Mi"
+              cpu: "500m"
+            requests:
+              memory: "512Mi"
+              cpu: "100m"
