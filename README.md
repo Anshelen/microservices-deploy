@@ -5,7 +5,7 @@
 ## About
 
 Project is dedicated to making a primitive microservices application.
-In this repository all deployment scripts are collected.
+This repository contains all scripts for CI/CD and deploying system.
 
 ## Commands
 
@@ -28,6 +28,43 @@ To access endpoint:
 ```
 curl $(kubectl get svc gateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}' -n msvc-ns)
 ```
+
+#### CI/CD
+Built using Jenkins. It should NOT be installed as Docker container (e.g. in GKE
+environment). The hosting machine must have docker and kubectl installed.
+
+#####Setting pipelines:
+1. Deploy services in GKE
+2. Install Jenkins with plugins:  
+   * [Kubernetes Cli](https://plugins.jenkins.io/kubernetes-cli)
+   * [Remote File](https://plugins.jenkins.io/remote-file)
+3. Call [script](jenkins/jenkins-register.sh). It will create service account 
+for Jenkins and print a token to access kubernetes cluster
+4. Create global credentials with the following ID's:
+   *  'github-creds' - username/password for git repository
+   *  'dockerhub-creds' - username/password for docker registry
+   *  'kubernetes-creds' - secret with 'secret text' type containing generated
+   token
+5. Replace IMAGE_BASE variable in jenkins files with values for your docker
+registry repositories. Similarly replace CLUSTER_URL with your kubernetes master
+url:
+    ```
+    kubectl cluster-info
+    ```  
+6. Create multibranch pipelines for both backend and gateway services. In
+"Build Configuration" choose to fetch Jenkinsfile using remote file plugin. Set
+appropriate script path for each file (e.g. jenkins/Jenkinsfile-backend) and
+pick up your git repository. Toggle "Periodically if not otherwise run" in
+"Scan Repository Triggers" to scan main repository for changes every a few
+minutes.
+
+#####Build steps:
+1. Checkout from git
+2. Build and compile project in isolated docker environment (jdk image)
+3. Test project
+4. Compose docker image and push it to docker registry with 'latest' and 
+'v$BUILD_NUMBER' tags
+5. Trigger kubernetes cluster to use image with the actual 'v$BUILD_NUMBER' tag
 
 ## License
 
