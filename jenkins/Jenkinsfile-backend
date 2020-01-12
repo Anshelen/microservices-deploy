@@ -8,8 +8,6 @@ pipeline {
     IMAGE_BASE = 'anshelen/microservices-backend'
   	IMAGE_NAME = "${env.IMAGE_BASE}:v$BUILD_NUMBER"
   	IMAGE_NAME_LATEST = "${env.IMAGE_BASE}:latest"
-  	CLUSTER_URL = 'https://35.240.88.79'
-  	CLUSTER_NS = 'msvc-ns'
   }
   stages {
     stage('Checkout') {
@@ -71,7 +69,7 @@ pipeline {
         branch 'master'
       }
       steps {
-        withKubeConfig([credentialsId: 'kubernetes-creds', serverUrl: "${env.CLUSTER_URL}", namespace: "${env.CLUSTER_NS}"]) {
+        withKubeConfig([credentialsId: 'kubernetes-creds', serverUrl: "${CLUSTER_URL}", namespace: 'msvc-ns']) {
           sh "kubectl set image deployment/backend backend=${env.IMAGE_NAME} --record"
         }
       }

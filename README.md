@@ -31,7 +31,10 @@ curl $(kubectl get svc gateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}
 
 #### CI/CD
 Built using Jenkins. It should NOT be installed as Docker container (e.g. in GKE
-environment). The hosting machine must have docker and kubectl installed.
+environment). The hosting machine must have docker and kubectl installed. If you
+are going to use docker images from your own docker registry account, then
+you need to correct hardcoded values (e.g. 'anshelen/microservices-backend') in
+kubernetes and jenkins files.
 
 #####Setting pipelines:
 1. Deploy services in GKE
@@ -45,9 +48,8 @@ for Jenkins and print a token to access kubernetes cluster
    *  'dockerhub-creds' - username/password for docker registry
    *  'kubernetes-creds' - secret with 'secret text' type containing generated
    token
-5. Replace IMAGE_BASE variable in jenkins files with values for your docker
-registry repositories. Similarly replace CLUSTER_URL with your kubernetes master
-url:
+5. Create Jenkins global environment variable CLUSTER_URL with url of your
+kubernetes master node. You can get it with command:
     ```
     kubectl cluster-info
     ```  
