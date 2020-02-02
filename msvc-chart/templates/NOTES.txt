@@ -13,3 +13,7 @@
   echo "Visit http://127.0.0.1:8080 to use your application"
   kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 8080:8080
 {{- end }}
+2. Get service account token:
+  export TOKEN=$(kubectl get serviceaccount {{ include "msvc-chart.serviceAccountName" . }} -n {{ .Release.Namespace }} -o go-template --template='{{`{{range .secrets}}{{.name}}{{"\n"}}{{end}}`}}')
+  export TOKEN_DECODED=$(kubectl get secrets "$TOKEN" -n {{ .Release.Namespace }} -o go-template --template '{{`{{index .data "token"}}`}}' | base64 -d)
+  echo $TOKEN_DECODED
