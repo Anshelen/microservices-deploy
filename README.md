@@ -89,6 +89,9 @@ To install chart with 'msvc-project' name:
 ```
 helm install msvc-project msvc-chart/
 ```
+Alternatively you can fetch this chart from the helm repository:
+https://anshelen.github.io/microservices-deploy/.
+
 Test chart:
 ```
 helm test msvc-project
