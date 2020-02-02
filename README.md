@@ -7,9 +7,9 @@
 Project is dedicated to making a primitive microservices application.
 This repository contains all scripts for CI/CD and deploying system.
 
-## Commands
+## Commands without using Helm 3
 
-#### Minikube
+#### Deploy on Minikube
 To deploy system in minikube:
 ```
 kubectl apply -f scripts_minikube/
@@ -19,7 +19,11 @@ To access endpoint:
 curl $(minikube service gateway --url -n msvc-ns)
 ```
 
-#### Google Kubernetes Engine
+#### Deploy on Google Kubernetes Engine
+I recommend to create cluster of minimum 2 standard nodes (n1-standard-1). It
+will give you enough resources to deploy this project with predefined resource
+requests and limits.
+
 To deploy system in GKE:
 ```
 kubectl apply -f scripts_gke/
@@ -36,7 +40,7 @@ are going to use docker images from your own docker registry account, then
 you need to correct hardcoded values (e.g. 'anshelen/microservices-backend') in
 kubernetes and jenkins files.
 
-#####Setting pipelines:
+##### Setting pipelines:
 1. Deploy services in GKE
 2. Install Jenkins with plugins:  
    * [Kubernetes Cli](https://plugins.jenkins.io/kubernetes-cli)
@@ -67,6 +71,53 @@ minutes.
 4. Compose docker image and push it to docker registry with 'latest' and 
 'v$BUILD_NUMBER' tags
 5. Trigger kubernetes cluster to use image with the actual 'v$BUILD_NUMBER' tag
+
+## Commands with using Helm 3
+
+#### Prepare environment (optional)
+You can set up namespace and resource quotas with command:
+```
+kubectl apply -f scripts_env/
+```
+To call all following commands in created namespace:
+```
+kubectl config set-context --current --namespace=msvc-ns
+```
+
+#### Install chart
+To install chart with 'msvc-project' name:
+```
+helm install msvc-project msvc-chart/
+```
+Test chart:
+```
+helm test msvc-project
+```
+
+#### Customize deployment
+Show available options:
+```
+helm show values msvc-chart/
+```
+To upgrade installation:
+```
+helm upgrade msvc-project msvc-chart/ --set backend.deployment.name=new-name
+```
+#####Notes:
+1. Argument --set can be used multiple times 
+2. To keep previously set options use flag --reuse-values
+3. You should not modify your cluster using 'kubectl'. All manipulations must
+be done through Helm
+4. On default gateway service is of LoadBalancer type (gateway.service.type=LoadBalancer).
+It is nice for deploy on GKE, but for Minikube it is more suitable to set this
+option to ClusterIP or NodePort
+5. Horizontal Pod Autoscalers for backend and gateway deployments are disabled
+by default. To enable, set backend/gateway.hpa.enabled=true. Keep in mind
+that you must provide requests.cpu value for deployment. If you prepared
+environment - it is done for you automatically. To enable or change cpu request
+manually, set backend/gateway.container.resources.requests.cpu=100m option
+6. Be default a service account is created for your deployments. You can
+cancel it by specifying serviceAccount.create=false option
 
 ## License
 
