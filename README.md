@@ -122,6 +122,22 @@ manually, set backend/gateway.container.resources.requests.cpu=100m option
 6. Be default a service account is created for your deployments. You can
 cancel it by specifying serviceAccount.create=false option
 
+#### CI/CD
+Setting pipeline using Helm is mostly the same as described above. Differences:
+1. Helm 3 should be installed on hosting machine
+2. List commands to obtain token for kubernetes credentials (no more need to 
+call jenkins/jenkins-register.sh script):
+    ```
+    helm status msvc-project
+    ```
+3. Create Jenkins global environment variable HELM_PROJECT with a name of your
+helm project (in out case it is 'msvc-project')
+4. Jenkinsfiles are placed in 'jenkins-helm' folder
+5. If you install helm chart without specifying any options - builds might not
+update images due to Helm [bug](https://github.com/helm/helm/issues/7509). To
+walkaround, upgrade the project manually for the first time:
+```helm upgrade msvc-project msvc-chart/ --set any=null```
+
 ## License
 
 This software is licensed under the [BSD License][BSD]. For more information, read the file [LICENSE](LICENSE).
