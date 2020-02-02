@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "msvc-chart.gateway.deployment.name" . }}
+  labels:
+    {{- include "msvc-chart.labels" . | nindent 4 }}
+    tier: gateway
+spec:
+  replicas: {{ .Values.gateway.deployment.replicas }}
+  selector:
+    matchLabels:
+      {{- include "msvc-chart.selectorLabels" . | nindent 6 }}
+      tier: gateway
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include "msvc-chart.propertiesHash" . }}
+      labels:
+        {{- include "msvc-chart.selectorLabels" . | nindent 8 }}
+        tier: gateway
+    spec:
+      serviceAccountName: {{ include "msvc-chart.serviceAccountName" . }}
+      containers:
+        - name: {{ include "msvc-chart.gateway.container.name" . }}
+          image: "{{ .Values.gateway.image.name }}:{{ .Values.gateway.image.tag }}"
+          imagePullPolicy: {{ .Values.gateway.image.pullPolicy }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "msvc-chart.urlConfig.defaultName" . }}
+          env:
+            - name: SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "msvc-chart.secrets.defaultName" . }}
+                  key: secret
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 3
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.gateway.container.resources | nindent 12 }}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "msvc-chart.gateway.service.name" . }}
+  labels:
+    {{- include "msvc-chart.labels" . | nindent 4 }}
+    tier: gateway
+spec:
+  type: {{ .Values.gateway.service.type }}
+  ports:
+    - port: {{ .Values.gateway.service.port }}
+      protocol: TCP
+      targetPort: 8080
+      name: http
+  selector:
+    {{- include "msvc-chart.selectorLabels" . | nindent 4 }}
+    tier: gateway
+
+---
+
+{{- if .Values.gateway.hpa.enabled -}}
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "msvc-chart.gateway.hpa.name" . }}
+  labels:
+    {{- include "msvc-chart.labels" . | nindent 4 }}
+    tier: gateway
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "msvc-chart.gateway.deployment.name" . }}
+  minReplicas: {{ .Values.gateway.hpa.minReplicas}}
+  maxReplicas: {{ .Values.gateway.hpa.maxReplicas}}
+  targetCPUUtilizationPercentage: {{ .Values.gateway.hpa.targetCPUUtilizationPercentage}}
+{{- end -}}

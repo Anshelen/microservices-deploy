@@ -1,0 +1,66 @@
+backend:
+  deployment:
+    name:
+    replicas: 2
+  container:
+    name:
+    resources: {}
+#      limits:
+#        memory: 1024Mi
+#        cpu: 500m
+#      requests:
+#        memory: 512Mi
+#        cpu: 100m
+  service:
+    name:
+    port: 8080
+  image:
+    name: anshelen/microservices-backend
+    tag: latest
+    pullPolicy: IfNotPresent
+  hpa:
+    enabled: false
+    name:
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 50
+
+gateway:
+  deployment:
+    name:
+    replicas: 2
+  container:
+    name:
+    resources: {}
+#      limits:
+#        memory: 1024Mi
+#        cpu: 500m
+#      requests:
+#        memory: 512Mi
+#        cpu: 100m
+  service:
+    name:
+    port: 80
+#   Can be one of ClusterIP, NodePort or LoadBalancer
+    type: LoadBalancer
+  image:
+    name: anshelen/microservices-gateway
+    tag: latest
+    pullPolicy: IfNotPresent
+  hpa:
+    enabled: false
+    name:
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 50
+
+secrets:
+  secret: default-secret
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the release and
+  # chart names
+  name:
