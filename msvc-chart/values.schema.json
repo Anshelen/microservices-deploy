@@ -1,0 +1,233 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "properties": {
+    "backend": {
+      "properties": {
+        "deployment": {
+          "properties": {
+            "name": {
+              "type": ["string", "null"]
+            },
+            "replicas": {
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        },
+        "container": {
+          "properties": {
+            "name": {
+              "type": ["string", "null"]
+            },
+            "resources": {
+              "properties": {
+                "limits": {
+                  "properties": {
+                    "memory": {
+                      "type": ["string", "number"]
+                    },
+                    "cpu": {
+                      "type": ["string", "number"]
+                    }
+                  },
+                  "type": "object"
+                },
+                "requests": {
+                  "properties": {
+                    "memory": {
+                      "type": ["string", "null"]
+                    },
+                    "cpu": {
+                      "type": ["string", "null"]
+                    }
+                  },
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "type": "object"
+        },
+        "service": {
+          "properties": {
+            "name": {
+              "type": ["string", "null"]
+            },
+            "port": {
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        },
+        "image": {
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "tag": {
+              "type": "string"
+            },
+            "pullPolicy": {
+              "enum": ["IfNotPresent", "Always", "Never"]
+            }
+          },
+          "type": "object"
+        },
+        "hpa": {
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "name": {
+              "type": ["string", "null"]
+            },
+            "minReplicas": {
+              "minimum": 1,
+              "type": "integer"
+            },
+            "maxReplicas": {
+              "minimum": 1,
+              "type": "integer"
+            },
+            "targetCPUUtilizationPercentage": {
+              "minimum": 1,
+              "maximum": 99,
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "gateway": {
+      "properties": {
+        "deployment": {
+          "properties": {
+            "name": {
+              "type": ["string", "null"]
+            },
+            "replicas": {
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        },
+        "container": {
+          "properties": {
+            "name": {
+              "type": ["string", "null"]
+            },
+            "resources": {
+              "properties": {
+                "limits": {
+                  "properties": {
+                    "memory": {
+                      "type": ["string", "number"]
+                    },
+                    "cpu": {
+                      "type": ["string", "number"]
+                    }
+                  },
+                  "type": "object"
+                },
+                "requests": {
+                  "properties": {
+                    "memory": {
+                      "type": ["string", "null"]
+                    },
+                    "cpu": {
+                      "type": ["string", "null"]
+                    }
+                  },
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "type": "object"
+        },
+        "service": {
+          "properties": {
+            "name": {
+              "type": ["string", "null"]
+            },
+            "port": {
+              "minimum": 1,
+              "type": "integer"
+            },
+            "type": {
+              "enum": ["ClusterIP", "NodePort", "LoadBalancer"]
+            }
+          },
+          "type": "object"
+        },
+        "image": {
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "tag": {
+              "type": "string"
+            },
+            "pullPolicy": {
+              "enum": ["IfNotPresent", "Always", "Never"]
+            }
+          },
+          "type": "object"
+        },
+        "hpa": {
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "name": {
+              "type": ["string", "null"]
+            },
+            "minReplicas": {
+              "minimum": 1,
+              "type": "integer"
+            },
+            "maxReplicas": {
+              "minimum": 1,
+              "type": "integer"
+            },
+            "targetCPUUtilizationPercentage": {
+              "minimum": 1,
+              "maximum": 99,
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "secrets": {
+      "properties": {
+        "secret": {
+          "type": ["number", "string"]
+        }
+      },
+      "type": "object"
+    },
+    "createAccount": {
+      "properties": {
+        "create": {
+          "type": "boolean"
+        },
+        "name": {
+          "type": ["string", "null"]
+        }
+      },
+      "type": "object"
+    }
+  },
+  "title": "Values",
+  "type": "object"
+}
