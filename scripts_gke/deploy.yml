@@ -14,8 +14,8 @@ metadata:
   namespace: msvc-ns
 spec:
   hard:
-    limits.cpu: "4"
-    limits.memory: 8Gi
+    limits.cpu: "2"
+    limits.memory: 4Gi
 
 ---
 
@@ -27,11 +27,11 @@ metadata:
 spec:
   limits:
     - default:
-        cpu: "700m"
-        memory: "1024Mi"
+        memory: "512Mi"
+        cpu: "250m"
       defaultRequest:
-        cpu: "200m"
         memory: "256Mi"
+        cpu: "50m"
       type: Container
 
 ---
@@ -133,7 +133,7 @@ spec:
           resources:
             limits:
               memory: "512Mi"
-              cpu: "300m"
+              cpu: "250m"
             requests:
               memory: "256Mi"
               cpu: "50m"
