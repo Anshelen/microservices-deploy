@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: urls-config
-  namespace: msvc-ns
-data:
-  BACKEND_URL: "http://backend:8080/"
