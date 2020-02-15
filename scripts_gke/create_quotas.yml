@@ -2,11 +2,10 @@ apiVersion: v1
 kind: ResourceQuota
 metadata:
   name: msvc-quota
-  namespace: msvc-ns
 spec:
   hard:
-    limits.cpu: "4"
-    limits.memory: 8Gi
+    limits.cpu: "2"
+    limits.memory: 4Gi
 
 ---
 
@@ -14,13 +13,12 @@ apiVersion: v1
 kind: LimitRange
 metadata:
   name: msvc-default-resources
-  namespace: msvc-ns
 spec:
   limits:
     - default:
-        cpu: "300m"
         memory: "512Mi"
+        cpu: "250m"
       defaultRequest:
-        cpu: "100m"
         memory: "256Mi"
+        cpu: "50m"
       type: Container

@@ -7,6 +7,17 @@
 Project is dedicated to making a primitive microservices application.
 This repository contains all scripts for CI/CD and deploying system.
 
+## Create namespace
+
+To create namespace:
+```
+kubectl create ns msvc-ns
+```
+To set namespace msvc-ns as default:
+```
+kubectl config set-context --current --namespace=msvc-ns
+```
+
 ## Commands without using Helm 3
 
 #### Deploy on Minikube
@@ -14,7 +25,7 @@ To deploy system in minikube:
 ```
 kubectl apply -f scripts_minikube/
 ```
-To access endpoint:
+To access endpoint (remove -n flag if you deployed to default namespace):
 ```
 curl $(minikube service gateway --url -n msvc-ns)
 ```
@@ -30,7 +41,7 @@ kubectl apply -f scripts_gke/
 ```
 To access endpoint:
 ```
-curl $(kubectl get svc gateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}' -n msvc-ns)
+curl $(kubectl get svc gateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
 ```
 
 #### CI/CD
@@ -38,7 +49,8 @@ Built using Jenkins. It should NOT be installed as Docker container (e.g. in GKE
 environment). The hosting machine must have docker and kubectl installed. If you
 are going to use docker images from your own docker registry account, then
 you need to correct hardcoded values (e.g. 'anshelen/microservices-backend') in
-kubernetes and jenkins files.
+kubernetes and jenkins files. Also Jenkins is set to use 'msvc-ns' namespace for
+cluster.
 
 ##### Setting pipelines:
 1. Deploy services in GKE
