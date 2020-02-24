@@ -76,7 +76,7 @@ pick up your git repository. Toggle "Periodically if not otherwise run" in
 "Scan Repository Triggers" to scan main repository for changes every a few
 minutes.
 
-#####Build steps:
+##### Build steps:
 1. Checkout from git
 2. Build and compile project in isolated docker environment (jdk image)
 3. Test project
@@ -118,7 +118,7 @@ To upgrade installation:
 ```
 helm upgrade msvc-project msvc-chart/ --set backend.deployment.name=new-name
 ```
-#####Notes:
+##### Notes:
 1. Argument --set can be used multiple times 
 2. To keep previously set options use flag --reuse-values
 3. You should not modify your cluster using 'kubectl'. All manipulations must
