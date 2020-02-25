@@ -3,9 +3,9 @@ entries:
   msvc-chart:
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2020-02-19T23:12:30.412441589+03:00"
+    created: "2020-02-26T00:04:25.244104525+03:00"
     description: Microservices project
-    digest: 4bcdbce7d8fa01e8cc4be3a4e7555d85227d75254acd24ab303a07f9635c8325
+    digest: c1906116f1b169a1d064531914bb33d9bcdd7ee69db8fbdf6aa43f66231ab0e2
     maintainers:
     - email: anshelen@yandex.ru
       name: Anton Shelenkov
@@ -19,4 +19,4 @@ entries:
     urls:
     - https://anshelen.github.io/microservices-deploy/msvc-chart-1.0.0.tgz
     version: 1.0.0
-generated: "2020-02-19T23:12:30.410792931+03:00"
+generated: "2020-02-26T00:04:25.237955593+03:00"
