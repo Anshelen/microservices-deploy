@@ -18,8 +18,6 @@ spec:
     type: RollingUpdate
   template:
     metadata:
-      annotations:
-        checksum/config: {{ include "msvc-chart.propertiesHash" . }}
       labels:
         {{- include "msvc-chart.selectorLabels" . | nindent 8 }}
         tier: backend
@@ -29,9 +27,6 @@ spec:
         - name: {{ include "msvc-chart.backend.container.name" . }}
           image: "{{ .Values.backend.image.name }}:{{ .Values.backend.image.tag }}"
           imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
-          envFrom:
-            - configMapRef:
-                name: {{ include "msvc-chart.urlConfig.defaultName" . }}
           ports:
             - containerPort: 8080
               protocol: TCP
