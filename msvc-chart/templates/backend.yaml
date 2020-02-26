@@ -73,7 +73,7 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: {{ include "msvc-chart.backend.deployment.name" . }}
-  minReplicas: {{ .Values.backend.hpa.minReplicas}}
-  maxReplicas: {{ .Values.backend.hpa.maxReplicas}}
-  targetCPUUtilizationPercentage: {{ .Values.backend.hpa.targetCPUUtilizationPercentage}}
+  minReplicas: {{ .Values.backend.hpa.minReplicas }}
+  maxReplicas: {{ .Values.backend.hpa.maxReplicas }}
+  targetCPUUtilizationPercentage: {{ .Values.backend.hpa.targetCPUUtilizationPercentage }}
 {{- end -}}

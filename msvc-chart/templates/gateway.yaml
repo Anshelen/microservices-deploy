@@ -85,7 +85,7 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: {{ include "msvc-chart.gateway.deployment.name" . }}
-  minReplicas: {{ .Values.gateway.hpa.minReplicas}}
-  maxReplicas: {{ .Values.gateway.hpa.maxReplicas}}
-  targetCPUUtilizationPercentage: {{ .Values.gateway.hpa.targetCPUUtilizationPercentage}}
+  minReplicas: {{ .Values.gateway.hpa.minReplicas }}
+  maxReplicas: {{ .Values.gateway.hpa.maxReplicas }}
+  targetCPUUtilizationPercentage: {{ .Values.gateway.hpa.targetCPUUtilizationPercentage }}
 {{- end -}}

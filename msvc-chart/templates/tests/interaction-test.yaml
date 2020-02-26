@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: "{{ .Release.Name }}-test-gateway-connection"
+  name: "{{ .Release.Name }}-interaction-test"
   labels:
     {{- include "msvc-chart.labels" . | nindent 4 }}
   annotations:
@@ -14,6 +14,6 @@ spec:
       - name: test
         image: busybox
         command: ['wget']
-        args:  ['{{ include "msvc-chart.gateway.service.name" . }}:{{ .Values.gateway.service.port }}/actuator/health']
+        args:  ['{{ include "msvc-chart.gateway.service.name" . }}:{{ .Values.gateway.service.port }}/']
       restartPolicy: Never
   backoffLimit: 3
