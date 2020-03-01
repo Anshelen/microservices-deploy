@@ -6,10 +6,8 @@ pipeline {
   }
   environment {
     IMAGE_BASE = 'anshelen/microservices-backend'
-    IMAGE_TAG = "v$BUILD_NUMBER"
-  	IMAGE_NAME = "${env.IMAGE_BASE}:${env.IMAGE_TAG}"
+  	IMAGE_NAME = "${env.IMAGE_BASE}:v$BUILD_NUMBER"
   	IMAGE_NAME_LATEST = "${env.IMAGE_BASE}:latest"
-  	DOCKERFILE_NAME = "Dockerfile-packaged"
   }
   stages {
     stage('Checkout') {
@@ -42,14 +40,6 @@ pipeline {
             junit '**/target/surefire-reports/TEST-*.xml'
           }
         }
-        stage('Package') {
-          steps {
-            unstash 'compiled'
-            sh './mvnw package -DskipTests'
-            stash(name: 'jar', includes: '**/target/microservices-backend-*.jar')
-            stash(name: 'dockerfile', includes: "${env.DOCKERFILE_NAME}")
-          }
-        }
       }
     }
 
@@ -59,11 +49,10 @@ pipeline {
         branch 'master'
       }
       steps {
-        unstash 'jar'
-        unstash 'dockerfile'
+        unstash 'sources'
         script {
           def imageName = "${env.IMAGE_NAME}"
-          def dockerImage = docker.build("${env.IMAGE_NAME}", "-f ${env.DOCKERFILE_NAME} .")
+          def dockerImage = docker.build("${env.IMAGE_NAME}")
           docker.withRegistry('', 'dockerhub-creds') {
             dockerImage.push()
             dockerImage.push("latest")
@@ -80,8 +69,8 @@ pipeline {
         branch 'master'
       }
       steps {
-        withKubeConfig([credentialsId: 'kubernetes-creds', serverUrl: "${CLUSTER_URL}", namespace: "${CLUSTER_NAMESPACE}"]) {
-          sh "helm upgrade ${HELM_PROJECT} ${HELM_CHART} --reuse-values --set backend.image.tag=${env.IMAGE_TAG}"
+        withKubeConfig([credentialsId: 'kubernetes-creds', serverUrl: "${CLUSTER_URL}", namespace: 'msvc-ns']) {
+          sh "kubectl set image deployment/backend backend=${env.IMAGE_NAME} --record"
         }
       }
     }

@@ -57,7 +57,7 @@ cluster.
 2. Install Jenkins with plugins:  
    * [Kubernetes Cli](https://plugins.jenkins.io/kubernetes-cli)
    * [Remote File](https://plugins.jenkins.io/remote-file)
-3. Call [script](jenkins/jenkins-register.sh). It will create service account 
+3. Call [script](jenkins-kubectl/jenkins-register.sh). It will create service account 
 for Jenkins and print a token to access kubernetes cluster
 4. Create global credentials with the following ID's:
    *  'github-creds' - username/password for git repository
