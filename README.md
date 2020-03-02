@@ -18,7 +18,7 @@ To set namespace msvc-ns as default:
 kubectl config set-context --current --namespace=msvc-ns
 ```
 
-## Commands without using Helm 3
+## Commands using pure Kubectl
 
 #### Deploy on Minikube
 To deploy system in minikube:
@@ -49,8 +49,8 @@ Built using Jenkins. It should NOT be installed as Docker container (e.g. in GKE
 environment). The hosting machine must have docker and kubectl installed. If you
 are going to use docker images from your own docker registry account, then
 you need to correct hardcoded values (e.g. 'anshelen/microservices-backend') in
-kubernetes and jenkins files. Also Jenkins is set to use 'msvc-ns' namespace for
-cluster.
+kubernetes and jenkins files. Also Jenkins is using 'msvc-ns' namespace in a
+cluster. All files are situated in 'jenkins-kubectl' folder.
 
 ##### Setting pipelines:
 1. Deploy services in GKE
@@ -70,11 +70,11 @@ kubernetes master node. You can get it with command:
     kubectl cluster-info
     ```  
 6. Create multibranch pipelines for both backend and gateway services. In
-"Build Configuration" choose to fetch Jenkinsfile using remote file plugin. Set
-appropriate script path for each file (e.g. jenkins/Jenkinsfile-backend) and
-pick up your git repository. Toggle "Periodically if not otherwise run" in
-"Scan Repository Triggers" to scan main repository for changes every a few
-minutes.
+"Build Configuration" choose fetching Jenkinsfile using remote file plugin. Set
+appropriate script path for each file (e.g. jenkins-kubectl/Jenkinsfile-backend)
+and pick up your git repository. Fields 'Local File' and 'Branch Specifier'
+should be left blank. Toggle "Periodically if not otherwise run" in "Scan
+Repository Triggers" to scan main repository for changes every a few minutes.
 
 ##### Build steps:
 1. Checkout from git
@@ -84,7 +84,7 @@ minutes.
 'v$BUILD_NUMBER' tags
 5. Trigger kubernetes cluster to use image with the actual 'v$BUILD_NUMBER' tag
 
-## Commands with using Helm 3
+## Commands using Helm 3
 
 #### Prepare environment (optional)
 You can set up namespace and resource quotas with command:
@@ -97,13 +97,18 @@ kubectl config set-context --current --namespace=msvc-ns
 ```
 
 #### Install chart
+Add repository with you chart:
+```
+helm repo add msvc-repo https://anshelen.github.io/microservices-deploy/
+```
+Update local repositories data:
+```
+helm repo update
+```
 To install chart with 'msvc-project' name:
 ```
-helm install msvc-project msvc-chart/
+helm install msvc-project msvc-repo/msvc-chart
 ```
-Alternatively you can fetch this chart from the helm repository:
-https://anshelen.github.io/microservices-deploy/.
-
 Test chart:
 ```
 helm test msvc-project
@@ -112,12 +117,13 @@ helm test msvc-project
 #### Customize deployment
 Show available options:
 ```
-helm show values msvc-chart/
+helm show values msvc-repo/msvc-chart
 ```
 To upgrade installation:
 ```
-helm upgrade msvc-project msvc-chart/ --set backend.deployment.name=new-name
+helm upgrade msvc-project msvc-repo/msvc-chart --set backend.deployment.name=new-name
 ```
+
 ##### Notes:
 1. Argument --set can be used multiple times 
 2. To keep previously set options use flag --reuse-values
@@ -131,24 +137,34 @@ by default. To enable, set backend/gateway.hpa.enabled=true. Keep in mind
 that you must provide requests.cpu value for deployment. If you prepared
 environment - it is done for you automatically. To enable or change cpu request
 manually, set backend/gateway.container.resources.requests.cpu=100m option
-6. Be default a service account is created for your deployments. You can
+6. By default a service account is created for your deployments. You can
 cancel it by specifying serviceAccount.create=false option
 
 #### CI/CD
-Setting pipeline using Helm is mostly the same as described above. Differences:
-1. Helm 3 should be installed on hosting machine
+Setting pipeline using Helm is mostly the same as described above. All files are
+located in 'jenkins-helm' folder.
+Differences:
+1. Helm 3 should be installed on hosting machine and your chart repository
+should be added manually (see commands above)
 2. List commands to obtain token for kubernetes credentials (no more need to 
-call jenkins/jenkins-register.sh script):
+call jenkins-kubectl/jenkins-register.sh script):
     ```
     helm status msvc-project
     ```
 3. Create Jenkins global environment variable HELM_PROJECT with a name of your
 helm project (in out case it is 'msvc-project')
-4. Jenkinsfiles are placed in 'jenkins-helm' folder
-5. If you install helm chart without specifying any options - builds might not
+4. If you install helm chart without specifying any options - builds might not
 update images due to Helm [bug](https://github.com/helm/helm/issues/7509). To
 walkaround, upgrade the project manually for the first time:
-```helm upgrade msvc-project msvc-chart/ --set any=null```
+```helm upgrade msvc-project msvc-repo/msvc-chart --set any=null```
+
+## CI/CD with packaged Dockerfile
+Files with additional 'package' step are collected in 'jenkins' folder. Docker
+images are created directly from the tested jar-archives (in above methods they
+were created from scratch). It minimizes pipeline time.
+Some mandatory global environment variables for Jenkins were added:
+  * HELM_CHART - your repo with chart name (e.g. msvc-repo/msvc-chart)
+  * CLUSTER_NAMESPACE - Kubernetes cluster namespace
 
 ## License
 
