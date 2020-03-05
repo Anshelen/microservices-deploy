@@ -59,7 +59,6 @@ pipeline {
         unstash 'jar'
         unstash 'dockerfile'
         script {
-          def imageName = "${env.IMAGE_NAME}"
           def dockerImage = docker.build("${env.IMAGE_NAME}", "-f ${env.DOCKERFILE_NAME} .")
           docker.withRegistry('', 'dockerhub-creds') {
             dockerImage.push()
