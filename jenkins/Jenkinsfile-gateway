@@ -17,6 +17,7 @@ pipeline {
       steps {
         checkout scm
         stash(name: 'sources', includes: '**')
+        stash(name: 'dockerfile', includes: "${env.DOCKERFILE_NAME}")
       }
     }
 
@@ -32,22 +33,18 @@ pipeline {
           steps {
             unstash 'sources'
             sh './mvnw compile'
-            stash(name: 'compiled', includes: '**')
           }
         }
         stage('Test') {
           steps {
-            unstash 'compiled'
             sh './mvnw test'
             junit '**/target/surefire-reports/TEST-*.xml'
           }
         }
         stage('Package') {
           steps {
-            unstash 'compiled'
             sh './mvnw package -DskipTests'
             stash(name: 'jar', includes: '**/target/microservices-gateway-*.jar')
-            stash(name: 'dockerfile', includes: "${env.DOCKERFILE_NAME}")
           }
         }
       }
