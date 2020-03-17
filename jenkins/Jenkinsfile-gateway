@@ -11,14 +11,6 @@ pipeline {
   	DOCKERFILE_NAME = "Dockerfile-packaged"
   }
   stages {
-    stage('Checkout') {
-      agent any
-      steps {
-        stash(name: 'sources', includes: '**')
-        stash(name: 'dockerfile', includes: "${env.DOCKERFILE_NAME}")
-      }
-    }
-
     stage("Prepare container") {
       agent {
         docker {
@@ -29,7 +21,6 @@ pipeline {
       stages {
         stage('Build') {
           steps {
-            unstash 'sources'
             sh './mvnw compile'
           }
         }
@@ -42,7 +33,6 @@ pipeline {
         stage('Package') {
           steps {
             sh './mvnw package -DskipTests'
-            stash(name: 'jar', includes: '**/target/microservices-gateway-*.jar')
           }
         }
       }
@@ -54,8 +44,6 @@ pipeline {
         branch 'master'
       }
       steps {
-        unstash 'jar'
-        unstash 'dockerfile'
         script {
           def dockerImage = docker.build("${env.IMAGE_NAME}", "-f ${env.DOCKERFILE_NAME} .")
           docker.withRegistry('', 'dockerhub-creds') {
