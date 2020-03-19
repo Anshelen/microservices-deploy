@@ -2,6 +2,7 @@ pipeline {
   agent none
   options {
     skipStagesAfterUnstable()
+    skipDefaultCheckout()
   }
   environment {
     IMAGE_BASE = 'anshelen/microservices-backend'
@@ -21,6 +22,7 @@ pipeline {
       stages {
         stage('Build') {
           steps {
+            checkout scm
             sh './mvnw compile'
           }
         }
