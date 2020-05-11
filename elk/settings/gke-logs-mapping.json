@@ -1,0 +1,62 @@
+{
+  "mapping": {
+    "_doc": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "@version": {
+          "type": "keyword"
+        },
+        "Request": {
+          "type": "long"
+        },
+        "image": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword"
+            }
+          }
+        },
+        "level": {
+          "type": "keyword"
+        },
+        "logger_name": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword"
+            }
+          }
+        },
+        "message": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 128
+            }
+          }
+        },
+        "pod_uid": {
+          "type": "keyword"
+        },
+        "service": {
+          "type": "keyword"
+        },
+        "tags": {
+          "type": "keyword"
+        },
+        "stack_trace": {
+          "type": "text",
+          "index": false,
+          "norms": false
+        },
+        "thread_name": {
+          "type": "keyword"
+        }
+      }
+    }
+  }
+}

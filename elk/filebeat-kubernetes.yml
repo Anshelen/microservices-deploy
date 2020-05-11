@@ -26,10 +26,6 @@ data:
             - logs_path:
                 logs_path: "/var/log/containers/"
 
-    processors:
-      - add_cloud_metadata:
-      - add_host_metadata:
-
     output.logstash:
       hosts: ['${LOGSTASH_HOST:localhost}:${LOGSTASH_PORT:5044}']
 
