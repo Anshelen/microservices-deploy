@@ -165,6 +165,142 @@ were created from scratch). It minimizes pipeline time.
 Some mandatory global environment variables for Jenkins were added:
   * HELM_CHART - your repo with chart name (e.g. msvc-repo/msvc-chart)
   * CLUSTER_NAMESPACE - Kubernetes cluster namespace
+ 
+## Set up ELK
+We will need 3 Google Compute Engine VMs to install 3 Elasticsearch nodes 
+(3 master nodes, 2 data nodes), Logstash, Kibana and Nginx proxy. 
+As free GCP trial has a quote of 4 nodes, you should install your cluster on one
+node (e2-standard-2). All resources must be located in the same zone.
+
+### Steps
+
+1. Cluster can be installed with the following command:
+    ```helm
+    helm install msvc-project msvc-repo/msvc-chart \
+    --set backend.container.resources.requests.cpu=50m \
+    --set backend.hpa.enabled=true \
+    --set gateway.container.resources.requests.cpu=50m \
+    --set gateway.hpa.enabled=true \
+    --set secrets.secret=secret
+    ```
+
+2. Edit files in [elk](elk) package. Modify all urls like 
+'es-1.europe-west1-b.c.sturdy-lore-263019.internal' with your zone and project
+id. Template is 'es-*.<zone>.c.<project-id>.internal'.
+
+3. Create two standard persistent disks with 30 GB volume with names 
+'elk-data-1' and 'elk-data-2'.
+
+4. Create and add SSH key to your GCP account
+
+5. Create 3 GCE VMs:
+
+    | Instance name | Type | Boot disk capacity | Mounted disk | Enable HTTP traffic |
+    |:-------------:|:----:|:------------------:|:------------:|:-------------------:|
+    | es-1 | e2-standard-2 | 30 GB | None       | True  |
+    | es-2 | e2-medium     | 10 GB | elk-data-1 | False |
+    | es-3 | e2-medium     | 10 GB | elk-data-2 | False |
+    
+6. Format disks if they are just created:
+    ```
+    scp -i <path-to-ssh-private-key> elk/format_disk.sh <user-name>@<es-2-node-external-ip>:~/
+    ssh -i <path-to-ssh-private-key> <user-name>@<es-2-node-external-ip>  
+    sh format_disk.sh
+    ```
+   Repeat is similarly for es-3 node.
+
+7. Install software on all nodes:
+    ```
+    scp -i <path-to-ssh-private-key> elk/es-1/* <user-name>@<es-1-node-external-ip>:~/
+    ssh -i <path-to-ssh-private-key> <user-name>@<es-1-node-external-ip>  
+    sh install.sh
+    ```
+    Repeat is similarly for nodes es-2 and es-3.
+    
+8. Bootstrap services in es-1 node ```sh bootstrap.sh```. After completion
+(!!! its important) bootstrap other nodes.
+
+9. Check ES status:
+    ```
+    curl http://es-1.<your-zone>.c.<project-id>.internal:9200/_cat/health
+    ```
+    Status should be green. You can see all nodes: 
+    ```
+    curl http://es-1.<your-zone>.c.<project-id>.internal:9200/_cat/nodes
+    ```
+10. Navigate to <es-1-node-external-ip> and Kibana should be opened. 
+In StackManagement -> Index Lifecycle Policies create policy 'gke-logs-policy' 
+with the following settings:
+
+    Hot phase
+    
+    * Enable rollover: true
+    * Minimum index size: 5 GB 
+    * Maximum age: 3 days
+    * Index priority: 100
+   
+    Warm phase
+   
+    * Move to warm phase on rollover: false
+    * Timing for warm phase: 7 days from rollover
+    * Force merge: true
+    * Force merge number of segments: 1
+    * Index priority: 50
+    
+    Cold phase
+    
+    * Timing for cold phase: 21 days from rollover
+    * Freeze: true
+    * Index priority: 0
+    
+    Delete phase:
+    
+    * Timing for delete phase: 30 days from rollover
+ 
+11. In StackManagement -> Index Management -> Index Templates create new legacy 
+template:
+    
+    * Name: gke-logs-template
+    * Index pattern: gke-logs*
+    * Index settings: 
+        ```json
+        {
+          "index": {
+            "lifecycle": {
+              "name": "gke-logs-policy",
+              "rollover_alias": "gke-logs"
+            },
+            "number_of_shards": "1",
+            "number_of_replicas": "1"
+          }
+        }
+        ```
+    * Mappings: load [mapping file](elk/settings/gke-logs-mapping.json) 
+    * Dynamic mapping: disable
+    * Throw an exception when a document contains an unmapped field: true
+    
+12. Create initial index. Go to Dev Tools and execute:
+    ```
+    PUT gke-logs-000001
+    {
+        "aliases": {
+            "gke-logs": {
+                "is_write_index": true
+            }
+        }
+    }
+    ``` 
+    
+13. In StackManagement -> Index Patterns create default pattern 'gke-logs*' with
+timestamp field '@timestamp'
+
+14. Install filebeat on k8s cluster:
+    ```
+    kubectl apply -f elk/filebeat-kubernetes.yml
+    ```
+
+15. Send request to application, navigate to <es-1-node-ip> and see logs in
+Kibana ('Discover' tab).
 
 ## License
 
