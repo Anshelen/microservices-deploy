@@ -186,7 +186,7 @@ node (e2-standard-2). All resources must be located in the same zone.
 
 2. Edit files in [elk](elk) package. Modify all urls like 
 'es-1.europe-west1-b.c.sturdy-lore-263019.internal' with your zone and project
-id. Template is 'es-*.<zone>.c.<project-id>.internal'.
+id. Template is ```es-*.<zone>.c.<project-id>.internal```.
 
 3. Create two standard persistent disks with 30 GB volume with names 
 'elk-data-1' and 'elk-data-2'.
@@ -202,7 +202,7 @@ id. Template is 'es-*.<zone>.c.<project-id>.internal'.
     | es-3 | e2-medium     | 10 GB | elk-data-2 | False |
     
 6. Format disks if they are just created:
-    ```
+    ```shell script
     scp -i <path-to-ssh-private-key> elk/format_disk.sh <user-name>@<es-2-node-external-ip>:~/
     ssh -i <path-to-ssh-private-key> <user-name>@<es-2-node-external-ip>  
     sh format_disk.sh
@@ -210,7 +210,7 @@ id. Template is 'es-*.<zone>.c.<project-id>.internal'.
    Repeat is similarly for es-3 node.
 
 7. Install software on all nodes:
-    ```
+    ```shell script
     scp -i <path-to-ssh-private-key> elk/es-1/* <user-name>@<es-1-node-external-ip>:~/
     ssh -i <path-to-ssh-private-key> <user-name>@<es-1-node-external-ip>  
     sh install.sh
@@ -221,14 +221,14 @@ id. Template is 'es-*.<zone>.c.<project-id>.internal'.
 (!!! its important) bootstrap other nodes.
 
 9. Check ES status:
-    ```
+    ```shell script
     curl http://es-1.<your-zone>.c.<project-id>.internal:9200/_cat/health
     ```
     Status should be green. You can see all nodes: 
-    ```
+    ```shell script
     curl http://es-1.<your-zone>.c.<project-id>.internal:9200/_cat/nodes
     ```
-10. Navigate to <es-1-node-external-ip> and Kibana should be opened. 
+10. Navigate to ```<es-1-node-external-ip>``` and Kibana should be opened. 
 In StackManagement -> Index Lifecycle Policies create policy 'gke-logs-policy' 
 with the following settings:
 
@@ -295,11 +295,11 @@ template:
 timestamp field '@timestamp'
 
 14. Install filebeat on k8s cluster:
-    ```
+    ```shell script
     kubectl apply -f elk/filebeat-kubernetes.yml
     ```
 
-15. Send request to application, navigate to <es-1-node-ip> and see logs in
+15. Send request to application, navigate to ```<es-1-node-ip>``` and see logs in
 Kibana ('Discover' tab).
 
 ## License
