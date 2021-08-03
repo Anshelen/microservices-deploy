@@ -207,7 +207,7 @@ id. Template is ```es-*.<zone>.c.<project-id>.internal```.
     ssh -i <path-to-ssh-private-key> <user-name>@<es-2-node-external-ip>  
     sh format_disk.sh
     ```
-   Repeat is similarly for es-3 node.
+   Repeat it similarly for es-3 node.
 
 7. Install software on all nodes:
     ```shell script
@@ -215,7 +215,7 @@ id. Template is ```es-*.<zone>.c.<project-id>.internal```.
     ssh -i <path-to-ssh-private-key> <user-name>@<es-1-node-external-ip>  
     sh install.sh
     ```
-    Repeat is similarly for nodes es-2 and es-3.
+    Repeat it similarly for nodes es-2 and es-3.
     
 8. Bootstrap services in es-1 node ```sh bootstrap.sh```. After completion
 (!!! its important) bootstrap other nodes.
